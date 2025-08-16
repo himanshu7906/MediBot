@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Flask Chatbot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap (Optional, but enhances design) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Font Awesome for Icons (Optional) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Link to Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+  <section>
+    <div class="container py-5">
+      <div class="row d-flex justify-content-center">
+        <div class="col-md-8 col-lg-6 col-xl-4">
+
+          <div class="card" id="chat2" style="border-radius: 15px;">
+            <div class="card-header d-flex justify-content-between align-items-center p-3">
+              <h5 class="mb-0">ChatBot</h5>
+              <i class="fas fa-times text-muted"></i>
+            </div>
+
+            <div class="card-body" style="height: 400px; overflow-y: auto;">
+
+              <div class="d-flex justify-content-start mb-4">
+                <div class="card">
+                  <div class="card-body p-2">
+                    <p class="mb-0">Hi, I'm MediBot! How can I help you today?</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Example of user's message -->
+              <div class="d-flex justify-content-end mb-4">
+                <div class="card bg-primary text-white">
+                  <div class="card-body p-2">
+                    <p class="mb-0">Hello! What can you do?</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Add dynamic messages here using Flask or JS -->
+
+            </div>
+
+            <div class="card-footer text-muted d-flex justify-content-start align-items-center p-3">
+              <input type="text" class="form-control form-control-lg" id="chatInput" placeholder="Type message">
+              <a class="ms-3" href="#!"><i class="fas fa-paper-plane"></i></a>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+<script>
+  document.querySelector("a").addEventListener("click", sendMessage);
+  document.getElementById("chatInput").addEventListener("keypress", function (e) {
+    if (e.key === "Enter") {
+      sendMessage();
+    }
+  });
+
+  function sendMessage() {
+    const inputBox = document.getElementById("chatInput");
+    const message = inputBox.value;
+    if (!message.trim()) return;
+
+    // Display user's message
+    const userMessage = `
+      <div class="d-flex justify-content-end mb-4">
+        <div class="card bg-primary text-white">
+          <div class="card-body p-2">
+            <p class="mb-0">${message}</p>
+          </div>
+        </div>
+      </div>`;
+    document.querySelector(".card-body").innerHTML += userMessage;
+
+    // Send to Flask
+    fetch("/get", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: `msg=${encodeURIComponent(message)}`
+    })
+    .then(response => response.text())
+    .then(data => {
+      const botMessage = `
+        <div class="d-flex justify-content-start mb-4">
+          <div class="card">
+            <div class="card-body p-2">
+              <p class="mb-0">${data}</p>
+            </div>
+          </div>
+        </div>`;
+      document.querySelector(".card-body").innerHTML += botMessage;
+      inputBox.value = "";
+    });
+  }
+</script>
+
+</body>
+</html>
